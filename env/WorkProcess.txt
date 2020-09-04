@@ -1,0 +1,120 @@
+# 6.6/2019
+	# change "fetch" to ufo
+	# change "robot" to thunder
+	# create RK34 engine as a seperate module
+	# 无限次触发，一个stepcal选择一个
+# 6.9
+	add new env:
+	1.register:
+	cd /gym/gym/env/__init__.py
+	in  # robotics
+	before # Fetch model
+	add:
+	# thunder
+	register(
+	id='UfoReach{}-v1'.format(suffix),
+	entry_point='gym.envs.safethunder_index:SafeUfoReachEnv2',
+	kwargs=kwargs,
+	max_episode_steps=4000,
+	)
+	2. import:
+	cd /gym/gym/env/thunder/__init__.py
+	#FIXME import UFOenv
+	from gym.envs.safethunder_index.ufo_env import UfoEnv
+	from gym.envs.safethunder_index.ufo.reach import SafeUfoReachEnv2
+# 6.10
+	baseline her util.py store_args()在init()自动变成self的参数
+	动作20，全为0表示不作用，有一个1表示对应编号的力作用
+	robot_env init() ;action_space  用descrete
+	read the LEARN PYTHON 3 THE HARD WAY.pdf during the next week。
+	anaconda 环境里conda install jupeter
+# 6.11
+	# run jupeter notebook in terminal:
+	$ jupyter notebook
+	# open TestEnv in thunder
+	#  run command
+	$ shift+enter
+	# detele old command
+	$ Esc + d + d
+	# the command is blue
+	$ enter
+# 6.12
+	1.test engine
+	2. and the env functions
+	3. read HER and python3 .pdf
+	result
+	1. run engine_test.py, the result is good, similar to the result computed by MATLAB
+	2. run env_test.py :
+	env = gym.make('UfoReach-v1')
+	obs = env.reset()
+	action = np.array([1, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+	obs, reward, done, info = env.step(action)
+	the result is ok.
+	see what happend in .py files.
+# 6.13
+	read for algorithm
+	HER + DDPG
+	baselines: her need read
+	her folder: train.py
+	re-write the algorithm folder;
+# 6.17
+	gamma is too big, T is too big.
+	TODO restrict actions the times in env. MODIFY
+	ddpg.py #226
+	# sampeling 1000 samples to find the thread of every dimension of observation
+	ctrl + shift + f find the key words in the whole project
+
+# 2020.01.06
+	find the clip values of obs, revise config.clip_obs, and revising _preprocess_og() function.
+	env.__ini__.py: ax_episode_steps=int(8/0.002), may need fix
+
+# 01.12
+	revise the action activation function with sigmoid()
+	just one '1' will be in the action vector.
+
+# 01.13
+	can run now.
+	clip_norm is set to be inf.
+	-> action can be angle/rad + I size /N.s in range of [0,2pi]+[0,2],2 N.s = 1000*0.002
+	-> set a shorter time. re-compute the target point.
+	-> the above is completed.
+# 01.22
+	-> start a new env-2 with action number.
+	   define action index No.0 means no force imposed.
+	   so revise engine.py
+	-> the activation function of the output layer of policy should be softmax()
+	   so, only one thruster will be activated once. but non-limitation.
+	-> env-2 : safethunder_index_v0_origi
+
+############################
+# 01.23
+	*-> set constraint, and revise env-2 to env-3 in safethunder_index
+	sigmoid used, so more than one thrusters are activated.
+# 02.16
+	-> softmax function is used, one force actuacted once. 19+1 forces
+	   apply this env in ppo trpo.
+# 02.19
+	-> 02.16 is false.
+	-> revise:
+	   first scheme: create a discrete action of (0~19th + 20th + 21th): 0~19th means force, 20th means 0 N, 21th means hold on the state;
+	-> done is always false
+	*-> second scheme: remove 21th
+# 02.23
+	-> impose constraint, times of each thruster
+# 03.05
+	-> distance_threshold=1,
+# 03.09
+	-> t_sample = np.random.randint(50,int(2/0.02)-10)
+# 04.01
+	-> distance_threshold=5,
+	revise engine: L2=-0.02, consider gamma when compute index force
+	*-> testing env
+# 07.02
+	reduce force number to n_actions=12
+	thrust_lastimes=12
+# 07.26
+  n_actions=10
+	thrust_lastimes=10
+# 07.31
+  n_actions=6
+	thrust_lastimes=6
